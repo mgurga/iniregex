@@ -6,7 +6,7 @@ public class inivalidator {
 	
 	private static final String commentregex = ";.*";
 	private static final String sectionheaderregex = "\\[.*\\]";
-	private static final String propertyvalueregex = ".*=[ \\w.//]*";
+	private static final String propertyvalueregex = ".*=[ \\_0-9_\\w.//()]*";
 	
 	// checks based on rough ini standard
 	// [section]
@@ -20,6 +20,10 @@ public class inivalidator {
 		this.filelines = file;
 	}
 	
+	public inivalidator(String file) {
+		this.filelines = file.split("\n");
+	}
+	
 	public boolean isValid() {
 		boolean out = true;
 		for(int i = 0; i < filelines.length; i++) {
@@ -27,10 +31,14 @@ public class inivalidator {
 				out = false;
 			}
 		}
+		
+		if(out)
+			loadData();
+		
 		return out;
 	}
 	
-	public void loadData() {
+	private void loadData() {
 		String curSection = "";
 		boolean readingSection = false;
 		HashMap<String, String> properties = new HashMap<String, String>();
@@ -105,5 +113,22 @@ public class inivalidator {
 	
 	public String getSectionKey(String section, String key) {
 		return inihm.get(section).get(key);
+	}
+	
+	public String toString() {
+		String out = "";
+		String[] sections = listSections();
+		for(String i : sections) {
+			String[] keys = listSectionKeys(i);
+			out += i + "\n";
+			for(int j = 0; j < keys.length; j++) {
+				if(j < keys.length - 1) {
+					out += "┣" + keys[j] + ":" + getSectionKey(i, keys[j]) + "\n";
+				} else {
+					out += "┗" + keys[j] + ":" + getSectionKey(i, keys[j]) + "\n";
+				}
+			}
+		}
+		return out;
 	}
 }
